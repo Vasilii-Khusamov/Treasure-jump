@@ -24,7 +24,8 @@ public class PlayerController : MonoBehaviour
 	{
 		if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
 		{
-			isJumping = true;
+            AudioManager.Instance.PlaySFX(SFX.Jump);
+            isJumping = true;
 		}
 	}
 	// Update is called once per frame
