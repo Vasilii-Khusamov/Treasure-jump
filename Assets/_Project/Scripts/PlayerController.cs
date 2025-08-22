@@ -1,3 +1,5 @@
+using System;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -6,59 +8,75 @@ public class PlayerController : MonoBehaviour
 	private Rigidbody2D rigitBody2D;
 	SpriteRenderer spriteRenderer;
 	Animator playerAnimator;
-    [SerializeField] float speed = 100f;
+	[SerializeField] float speed = 100f;
 	[SerializeField] float jumpForce = 20f;
 	[SerializeField] float groundFriction = 0.5f;
 	[SerializeField] float airFriction = 0.1f;
-    private bool isJumping = false;
+	[SerializeField] float stepLenght = 1f;
+	private bool isJumping = false;
 	private bool isGrounded = true;
+	private float distanceTraveled = 0f;
 	// Start is called once before the first execution of Update after the MonoBehaviour is created
 	void Start()
 	{
 		rigitBody2D = gameObject.GetComponent<Rigidbody2D>();
 		spriteRenderer = gameObject.GetComponentInChildren<SpriteRenderer>();
 		playerAnimator = gameObject.GetComponentInChildren<Animator>();
-    }
+	}
 
 	private void Update()
 	{
 		if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
 		{
-            AudioManager.Instance.PlaySFX(SFX.Jump);
-            isJumping = true;
+			AudioManager.Instance.PlaySFX(SFX.Jump);
+			isJumping = true;
 		}
 	}
 	// Update is called once per frame
 	void FixedUpdate()
-    {
-        SetAnimation();
+	{
+		SetAnimation();
+		UpdateStepSound();
 
-        float newVelocityX = 0;
-        if (Input.GetKey(KeyCode.A))
-        {
-            newVelocityX += -speed * Time.fixedDeltaTime;
-            spriteRenderer.flipX = true;
+		float newVelocityX = 0;
+		if (Input.GetKey(KeyCode.A))
+		{
+			newVelocityX += -speed * Time.fixedDeltaTime;
+			spriteRenderer.flipX = true;
+		}
+
+		if (Input.GetKey(KeyCode.D))
+		{
+			newVelocityX += speed * Time.fixedDeltaTime;
+			spriteRenderer.flipX = false;
+		}
+
+		rigitBody2D.linearVelocityX = Mathf.Lerp(newVelocityX, rigitBody2D.linearVelocityX, 1 - GetFriction());
+		if (isJumping)
+		{
+			rigitBody2D.linearVelocityY = jumpForce;
+			isJumping = false;
+		}
+	}
+
+	private void UpdateStepSound()
+	{
+		distanceTraveled += math.abs(rigitBody2D.linearVelocityX * Time.fixedDeltaTime);
+		if (distanceTraveled >= stepLenght && isGrounded)
+		{
+			AudioManager.Instance.PlaySFX(SFX.Run);
+			distanceTraveled = 0f;
         }
+	}
 
-        if (Input.GetKey(KeyCode.D))
-        {
-            newVelocityX += speed * Time.fixedDeltaTime;
-            spriteRenderer.flipX = false;
-        }
-
-        rigitBody2D.linearVelocityX = Mathf.Lerp(newVelocityX, rigitBody2D.linearVelocityX, 1 - GetFriction());
-        if (isJumping)
-        {
-            rigitBody2D.linearVelocityY = jumpForce;
-            isJumping = false;
-        }
-    }
-
-
-    void OnTriggerEnter2D(Collider2D collider)
+	void OnTriggerEnter2D(Collider2D collider)
 	{
 		if (collider.gameObject.CompareTag("Ground"))
 		{
+			if (!isGrounded)
+			{ 
+				AudioManager.Instance.PlaySFX(SFX.Land);
+			}
 			isGrounded = true;
 		}
 	}
@@ -80,30 +98,30 @@ public class PlayerController : MonoBehaviour
 			return airFriction;
 		}
 	}
-    private void SetAnimation()
-    {
-        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
-        {
-            playerAnimator.SetBool("IsRunning", true);
-        }
-        else
-        {
-            playerAnimator.SetBool("IsRunning", false);
-        }
-        if (!isGrounded && rigitBody2D.linearVelocityY > 0)
-        {
-            playerAnimator.SetBool("IsJumping", true);
-            playerAnimator.SetBool("IsFalling", false);
-        }
-        else if (!isGrounded && rigitBody2D.linearVelocityY <= 0)
-        {
-            playerAnimator.SetBool("IsJumping", false);
-            playerAnimator.SetBool("IsFalling", true);
-        }
-        else
-        {
-            playerAnimator.SetBool("IsJumping", false);
-            playerAnimator.SetBool("IsFalling", false);
-        }
-    }
+	private void SetAnimation()
+	{
+		if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+		{
+			playerAnimator.SetBool("IsRunning", true);
+		}
+		else
+		{
+			playerAnimator.SetBool("IsRunning", false);
+		}
+		if (!isGrounded && rigitBody2D.linearVelocityY > 0)
+		{
+			playerAnimator.SetBool("IsJumping", true);
+			playerAnimator.SetBool("IsFalling", false);
+		}
+		else if (!isGrounded && rigitBody2D.linearVelocityY <= 0)
+		{
+			playerAnimator.SetBool("IsJumping", false);
+			playerAnimator.SetBool("IsFalling", true);
+		}
+		else
+		{
+			playerAnimator.SetBool("IsJumping", false);
+			playerAnimator.SetBool("IsFalling", false);
+		}
+	}
 }

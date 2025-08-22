@@ -5,7 +5,7 @@ using UnityEngine;
 		Jump,
 		Land,
 		Run
-    }
+	}
 public class AudioManager : MonoBehaviour
 {
 	public static AudioManager Instance;
@@ -15,8 +15,8 @@ public class AudioManager : MonoBehaviour
 	[SerializeField] AudioClip jumpClip;
 	[SerializeField] AudioClip landClip;
 	[SerializeField] AudioClip runClip;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Awake()
+	// Start is called once before the first execution of Update after the MonoBehaviour is created
+	void Awake()
 	{
 		if (Instance == null)
 		{
@@ -48,16 +48,16 @@ public class AudioManager : MonoBehaviour
 		{
 			case SFX.Jump:
 				audioClip = jumpClip;
-                break;
+				break;
 			case SFX.Land:
 				audioClip = landClip;
-                break;
+				break;
 			case SFX.Run:
 				audioClip = runClip;
-                break;
+				break;
 			default:
 				return;
-        }
-        SFXSource.PlayOneShot(audioClip);
+		}
+		SFXSource.PlayOneShot(audioClip);
 	}
 }
