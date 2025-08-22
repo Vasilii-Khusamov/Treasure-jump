@@ -1224,6 +1224,10 @@ PrefabInstance:
       propertyPath: stepLenght
       value: 1.8
       objectReference: {fileID: 0}
+    - target: {fileID: 2853264607350968477, guid: 033216a7653523944a5be0d6530752a0, type: 3}
+      propertyPath: groundFriction
+      value: 0.27
+      objectReference: {fileID: 0}
     - target: {fileID: 3024273962093001376, guid: 033216a7653523944a5be0d6530752a0, type: 3}
       propertyPath: m_Name
       value: Player
