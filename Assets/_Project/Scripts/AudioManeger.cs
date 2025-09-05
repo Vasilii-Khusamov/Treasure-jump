@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 	public enum SFX
@@ -11,12 +12,19 @@ public class AudioManager : MonoBehaviour
 	public static AudioManager Instance;
 	[Header("AudioSource")]
 	[SerializeField] AudioSource SFXSource;
-	[Header("AudioClips")]
+	[SerializeField] AudioSource MusicSource;
+    [Header("AudioClips")]
 	[SerializeField] AudioClip jumpClip;
 	[SerializeField] AudioClip landClip;
 	[SerializeField] AudioClip runClip;
-	// Start is called once before the first execution of Update after the MonoBehaviour is created
-	void Awake()
+	
+	public event Action<bool> OnSoundEnabledChanged;
+	public event Action<bool> OnMusicEnabledChanged;
+    public bool IsSoundEnabled { get; private set; } = true;
+	public bool IsMusicEnabled { get; private set; } = true;
+
+
+    void Awake()
 	{
 		if (Instance == null)
 		{
@@ -27,21 +35,30 @@ public class AudioManager : MonoBehaviour
 		{
 			Destroy(gameObject);
 		}
-	}
+		IsSoundEnabled = PlayerPrefs.GetInt("IsSoundEnabled", 1) == 1;
+		IsMusicEnabled = PlayerPrefs.GetInt("IsMusicEnabled", 1) == 1;
+    }
 
-
-	void Start()
+	public void SetMusicEnabled(bool isEnabled)
 	{
-
-	}
-
-	//Update is called once per frame
-	void Update()
+		IsMusicEnabled = isEnabled;
+		MusicSource.mute = !isEnabled;
+		PlayerPrefs.SetInt("IsMusicEnabled", isEnabled ? 1 : 0);
+        OnMusicEnabledChanged?.Invoke(isEnabled);
+    }
+	public void SetSoundEnabled(bool isEnabled)
 	{
-
-	}
-
-	public void PlaySFX(SFX sfx)
+		IsSoundEnabled = isEnabled;
+		SFXSource.mute = !isEnabled;
+		PlayerPrefs.SetInt("IsSoundEnabled", isEnabled ? 1 : 0);
+        OnSoundEnabledChanged?.Invoke(isEnabled);
+    }
+	public void ApplySettings()
+	{
+		SFXSource.mute = !IsSoundEnabled;
+		MusicSource.mute = !IsMusicEnabled;
+    }
+    public void PlaySFX(SFX sfx)
 	{
 		AudioClip audioClip;
 		switch (sfx)
